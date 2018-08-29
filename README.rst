@@ -13,6 +13,7 @@ kinto-megaphone
 
 Send global broadcast messages to Megaphone on changes.
 
+* `Megaphone <https://github.com/mozilla-services/megaphone/>`_
 * `Kinto documentation <http://kinto.readthedocs.io/en/latest/>`_
 * `Issue tracker <https://github.com/glasserc/kinto-megaphone/issues>`_
 
