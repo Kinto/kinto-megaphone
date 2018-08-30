@@ -21,3 +21,11 @@ def test_megaphone_send_put_failure_raises(requests):
     e = resp.raise_for_status.side_effect = AssertionError('hi')
     with pytest.raises(AssertionError, message='hi'):
         m.send_version('bid', 'chanid', 'myversion')
+
+
+def test_bearer_auth_adds_auth_header():
+    r = mock.MagicMock()
+    r.headers = {}
+    new_r = megaphone.BearerAuth("my-api-key")(r)
+    assert new_r == r
+    assert new_r.headers["Authorization"] == "Bearer my-api-key"

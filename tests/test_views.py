@@ -20,12 +20,21 @@ def get_request_class(prefix):
 
 
 @pytest.fixture
-def kinto_app():
+def megaphone_settings():
+    return {
+        'megaphone.api_key': 'token',
+        'megaphone.url': 'http://megaphone.example.com',
+    }
+
+
+@pytest.fixture
+def kinto_app(megaphone_settings):
     api_prefix = "v1"
 
     settings = {**kinto.core.DEFAULT_SETTINGS}
     settings.update(kinto.DEFAULT_SETTINGS)
     settings['includes'] += ' kinto_megaphone'
+    settings.update(megaphone_settings)
 
     config = Configurator(settings=settings)
     kinto.core.initialize(config, version='0.0.1')
@@ -47,3 +56,12 @@ def test_kinto_megaphone_capability(kinto_app):
         "description": "Send global broadcast messages to Megaphone on changes"
     }
     assert expected == capabilities['megaphone']
+
+
+def test_kinto_megaphone_complains_about_missing_key():
+    with pytest.raises(TypeError, message="Megaphone API key must be provided as megaphone.api_key"):
+        kinto_app({"megaphone.url": "some_url"})
+
+def test_kinto_megaphone_complains_about_missing_url():
+    with pytest.raises(TypeError, message="Megaphone url must be provided as megaphone.url"):
+        kinto_app({"megaphone.api_key": "api_key"})
