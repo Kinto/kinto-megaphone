@@ -18,6 +18,6 @@ def includeme(config):
         "megaphone",
         version=__version__,
         description="Send global broadcast messages to Megaphone on changes",
-        url="https://github.com/glasserc/kinto_megaphone")
+        url="https://github.com/glasserc/kinto-megaphone")
 
     # config.scan('kinto_megaphone.views')
