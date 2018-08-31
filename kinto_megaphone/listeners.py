@@ -1,3 +1,4 @@
+from kinto.core.events import ResourceChanged
 from kinto.core.listeners import ListenerBase
 from . import megaphone
 
@@ -7,10 +8,21 @@ class CollectionTimestamp(ListenerBase):
     """An event listener that pushes all collection timestamps to Megaphone."""
     def __init__(self, client, broadcaster_id):
         self.client = client
-        self.broadcaster_id
+        self.broadcaster_id = broadcaster_id
 
     def __call__(self, event):
-        pass
+        if not isinstance(event, ResourceChanged):
+            return
+
+        if event.payload['resource_name'] != 'record':
+            return
+
+        bucket_id = event.payload['bucket_id']
+        collection_id = event.payload['collection_id']
+        etag = event.payload['timestamp']
+        self.client.send_version(self.broadcaster_id,
+                                 '{}_{}'.format(bucket_id, collection_id),
+                                 '"{}"'.format(etag))
 
 
 def load_from_config(config, prefix):
