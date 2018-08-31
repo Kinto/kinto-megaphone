@@ -4,7 +4,7 @@ import webtest
 import kinto.core
 from pyramid.config import Configurator
 
-from kinto_megaphone import __version__ as plugin_version
+from kinto_megaphone.listeners import load_from_config
 
 
 def get_request_class(prefix):
@@ -22,8 +22,11 @@ def get_request_class(prefix):
 @pytest.fixture
 def megaphone_settings():
     return {
-        'megaphone.api_key': 'token',
-        'megaphone.url': 'http://megaphone.example.com',
+        'event_listeners': 'mp',
+        'event_listeners.mp.use' : 'kinto_megaphone.listeners',
+        'event_listeners.mp.api_key': 'token',
+        'event_listeners.mp.url': 'http://megaphone.example.com',
+        'event_listeners.mp.broadcaster_id': 'bcast',
     }
 
 
@@ -33,7 +36,6 @@ def kinto_app(megaphone_settings):
 
     settings = {**kinto.core.DEFAULT_SETTINGS}
     settings.update(kinto.DEFAULT_SETTINGS)
-    settings['includes'] += ' kinto_megaphone'
     settings.update(megaphone_settings)
 
     config = Configurator(settings=settings)
@@ -46,22 +48,20 @@ def kinto_app(megaphone_settings):
     return app
 
 
-def test_kinto_megaphone_capability(kinto_app):
-    resp = kinto_app.get('/')
-    capabilities = resp.json['capabilities']
-    assert 'megaphone' in capabilities
-    expected = {
-        "version": plugin_version,
-        "url": "https://github.com/glasserc/kinto-megaphone",
-        "description": "Send global broadcast messages to Megaphone on changes"
-    }
-    assert expected == capabilities['megaphone']
-
-
 def test_kinto_megaphone_complains_about_missing_key():
-    with pytest.raises(TypeError, message="Megaphone API key must be provided as megaphone.api_key"):
-        kinto_app({"megaphone.url": "some_url"})
+    settings = megaphone_settings()
+    del settings['event_listeners.mp.api_key']
+    with pytest.raises(TypeError, message="Megaphone API key must be provided for mp"):
+        load_from_config(settings)
 
 def test_kinto_megaphone_complains_about_missing_url():
-    with pytest.raises(TypeError, message="Megaphone url must be provided as megaphone.url"):
-        kinto_app({"megaphone.api_key": "api_key"})
+    settings = megaphone_settings()
+    del settings['event_listeners.mp.url']
+    with pytest.raises(TypeError, message="Megaphone url must be provided for mp"):
+        load_from_config(settings)
+
+def test_kinto_megaphone_complains_about_missing_broadcaster_id():
+    settings = megaphone_settings()
+    del settings['event_listeners.mp.broadcaster_id']
+    with pytest.raises(TypeError, message="Megaphone broadcaster_id must be provided for mp"):
+        load_from_config(settings)

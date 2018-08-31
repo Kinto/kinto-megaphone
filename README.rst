@@ -28,19 +28,16 @@ Install the Python package:
     pip install kinto-megaphone
 
 
-Include the package in the project configuration:
+Then, you'll want to add a listener. kinto-megaphone only offers one
+kind of listener right now, but that could change later.
 
-::
+Add it using configuration like::
 
-    kinto.includes = kinto_megaphone
+  kinto.event_listeners = mp
+  kinto.event_listeners.mp.use = kinto_megaphone.listeners
 
+Every listener also needs the following settings (with real values)::
 
-
-Configuration
--------------
-
-Fill those settings with the values obtained during the application registration:
-
-::
-
-    # kinto.megaphone.whatever = foobar
+  kinto.event_listeners.foo.api_key = foobar
+  kinto.event_listeners.foo.url = http://megaphone.example.com/
+  kinto.event_listeners.foo.broadcaster_id = remote-settings
