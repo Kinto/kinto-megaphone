@@ -8,7 +8,7 @@ from kinto.core.testing import DummyRequest
 from pyramid.config import Configurator
 
 from kinto_megaphone.listeners import load_from_config, CollectionTimestamp
-
+from kinto_megaphone.megaphone import BearerAuth
 
 def get_request_class(prefix):
 
@@ -30,6 +30,8 @@ def megaphone_settings():
         'event_listeners.mp.api_key': 'token',
         'event_listeners.mp.url': 'http://megaphone.example.com',
         'event_listeners.mp.broadcaster_id': 'bcast',
+        'bucket_create_principals': 'system.Everyone',
+        'collection_create_principals': 'system.Everyone',
     }
 
 
@@ -89,10 +91,11 @@ def test_kinto_listener_puts_version():
         {'new': {'id': 'abcd'}}
     ]
     request = DummyRequest()
+    request.registry.storage.collection_timestamp.return_value = 125
     event = events.ResourceChanged(payload, single_record, request)
 
     listener(event)
-    client.send_version.assert_called_with('broadcaster', 'food_french', '"123"')
+    client.send_version.assert_called_with('broadcaster', 'food_french', '"125"')
 
 
 def test_kinto_listener_ignores_reads():
@@ -138,3 +141,20 @@ def test_kinto_listener_ignores_writes_not_on_records():
 
     listener(event)
     assert not client.send_version.called
+
+
+@mock.patch('kinto_megaphone.megaphone.requests')
+def test_kinto_app_puts_version(requests, kinto_app):
+    kinto_app.put_json('/buckets/food', {})
+    kinto_app.put_json('/buckets/food/collections/french', {})
+    resp = kinto_app.put_json('/buckets/food/collections/french/records/escargot', {})
+    records_etag = resp.headers['ETag']
+
+    resp = kinto_app.get('/buckets/food/collections/french/records')
+    collection_etag = resp.headers['ETag']
+    assert records_etag == collection_etag
+
+    assert requests.put.call_count == 1
+    requests.put.assert_called_with('http://megaphone.example.com/v1/broadcasts/bcast/food_french',
+                                    auth=BearerAuth('token'),
+                                    data=records_etag)

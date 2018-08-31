@@ -19,7 +19,9 @@ class CollectionTimestamp(ListenerBase):
 
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
-        etag = event.payload['timestamp']
+        storage = event.request.registry.storage
+        parent_id = '/buckets/{}/collections/{}/records'.format(bucket_id, collection_id)
+        etag = storage.collection_timestamp('record', parent_id)
         self.client.send_version(self.broadcaster_id,
                                  '{}_{}'.format(bucket_id, collection_id),
                                  '"{}"'.format(etag))
