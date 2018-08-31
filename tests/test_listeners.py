@@ -56,23 +56,27 @@ def kinto_app(megaphone_settings):
 def test_kinto_megaphone_complains_about_missing_key():
     settings = megaphone_settings()
     del settings['event_listeners.mp.api_key']
-    with pytest.raises(TypeError, message="Megaphone API key must be provided for mp"):
-        load_from_config(settings)
-
+    config = Configurator(settings=settings)
+    with pytest.raises(TypeError) as excinfo:
+        load_from_config(config, 'event_listeners.mp.')
+    assert excinfo.value.args[0] == "Megaphone API key must be provided for event_listeners.mp."
 
 def test_kinto_megaphone_complains_about_missing_url():
     settings = megaphone_settings()
     del settings['event_listeners.mp.url']
-    with pytest.raises(TypeError, message="Megaphone url must be provided for mp"):
-        load_from_config(settings)
+    config = Configurator(settings=settings)
+    with pytest.raises(TypeError) as excinfo:
+        load_from_config(config, 'event_listeners.mp.')
+    assert excinfo.value.args[0] == "Megaphone URL must be provided for event_listeners.mp."
 
 
 def test_kinto_megaphone_complains_about_missing_broadcaster_id():
     settings = megaphone_settings()
     del settings['event_listeners.mp.broadcaster_id']
-    with pytest.raises(TypeError, message="Megaphone broadcaster_id must be provided for mp"):
-        load_from_config(settings)
-
+    config = Configurator(settings=settings)
+    with pytest.raises(TypeError) as excinfo:
+        load_from_config(config, 'event_listeners.mp.')
+    assert excinfo.value.args[0] == "Megaphone broadcaster_id must be provided for event_listeners.mp."
 
 def test_kinto_listener_puts_version():
     client = mock.Mock()
