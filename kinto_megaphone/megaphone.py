@@ -4,6 +4,7 @@ A thin client for the Megaphone service.
 
 import requests.auth
 
+
 class BearerAuth(requests.auth.AuthBase):
     def __init__(self, token):
         self.token = token

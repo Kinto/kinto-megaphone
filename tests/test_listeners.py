@@ -10,10 +10,10 @@ from pyramid.config import Configurator
 from kinto_megaphone.listeners import load_from_config, CollectionTimestamp
 from kinto_megaphone.megaphone import BearerAuth
 
+
 def get_request_class(prefix):
 
     class PrefixedRequestClass(webtest.app.TestRequest):
-
         @classmethod
         def blank(cls, path, *args, **kwargs):
             path = '/%s%s' % (prefix, path)
@@ -26,7 +26,7 @@ def get_request_class(prefix):
 def megaphone_settings():
     return {
         'event_listeners': 'mp',
-        'event_listeners.mp.use' : 'kinto_megaphone.listeners',
+        'event_listeners.mp.use': 'kinto_megaphone.listeners',
         'event_listeners.mp.api_key': 'token',
         'event_listeners.mp.url': 'http://megaphone.example.com',
         'event_listeners.mp.broadcaster_id': 'bcast',
@@ -61,6 +61,7 @@ def test_kinto_megaphone_complains_about_missing_key():
         load_from_config(config, 'event_listeners.mp.')
     assert excinfo.value.args[0] == "Megaphone API key must be provided for event_listeners.mp."
 
+
 def test_kinto_megaphone_complains_about_missing_url():
     settings = megaphone_settings()
     del settings['event_listeners.mp.url']
@@ -76,7 +77,9 @@ def test_kinto_megaphone_complains_about_missing_broadcaster_id():
     config = Configurator(settings=settings)
     with pytest.raises(TypeError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
-    assert excinfo.value.args[0] == "Megaphone broadcaster_id must be provided for event_listeners.mp."
+    error_msg = "Megaphone broadcaster_id must be provided for event_listeners.mp."
+    assert excinfo.value.args[0] == error_msg
+
 
 def test_kinto_listener_puts_version():
     client = mock.Mock()

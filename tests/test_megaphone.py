@@ -19,8 +19,9 @@ def test_megaphone_send_put_failure_raises(requests):
     m = megaphone.Megaphone('http://example.com/', 'mytoken')
     resp = requests.put.return_value = mock.Mock()
     e = resp.raise_for_status.side_effect = AssertionError('hi')
-    with pytest.raises(AssertionError, message='hi'):
+    with pytest.raises(AssertionError) as excinfo:
         m.send_version('bid', 'chanid', 'myversion')
+    assert excinfo.value == e
 
 
 def test_bearer_auth_adds_auth_header():

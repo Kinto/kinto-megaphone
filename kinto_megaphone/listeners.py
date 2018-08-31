@@ -5,6 +5,7 @@ from . import megaphone
 
 DEFAULT_SETTINGS = {}
 
+
 class CollectionTimestamp(ListenerBase):
     """An event listener that pushes all collection timestamps to Megaphone."""
     def __init__(self, client, broadcaster_id):
