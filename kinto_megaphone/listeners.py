@@ -1,5 +1,6 @@
 from kinto.core.events import ResourceChanged
 from kinto.core.listeners import ListenerBase
+from kinto.core import utils
 from . import megaphone
 
 DEFAULT_SETTINGS = {}
@@ -20,7 +21,9 @@ class CollectionTimestamp(ListenerBase):
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
         storage = event.request.registry.storage
-        parent_id = '/buckets/{}/collections/{}/records'.format(bucket_id, collection_id)
+        parent_id = utils.instance_uri(event.request, 'collection',
+                                       bucket_id=bucket_id,
+                                       id=collection_id)
         etag = storage.collection_timestamp('record', parent_id)
         self.client.send_version(self.broadcaster_id,
                                  '{}_{}'.format(bucket_id, collection_id),
