@@ -105,29 +105,6 @@ def test_kinto_listener_puts_version():
     client.send_version.assert_called_with('broadcaster', 'food_french', '"125"')
 
 
-def test_kinto_listener_ignores_reads():
-    client = mock.Mock()
-    listener = CollectionTimestampListener(client, 'broadcaster')
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'food',
-        'collection_id': 'french',
-        'id': 'blahblah',
-    }
-    single_record = [
-        {'id': 'abcd'}
-    ]
-    request = DummyRequest()
-    event = events.ResourceRead(payload, single_record, request)
-
-    listener(event)
-    assert not client.send_version.called
-
-
 def test_kinto_listener_ignores_writes_not_on_records():
     client = mock.Mock()
     listener = CollectionTimestampListener(client, 'broadcaster')

@@ -1,5 +1,4 @@
 from pyramid.config import ConfigurationError
-from kinto.core.events import ResourceChanged
 from kinto.core.listeners import ListenerBase
 from kinto.core import utils
 from . import megaphone
@@ -14,9 +13,6 @@ class CollectionTimestampListener(ListenerBase):
         self.broadcaster_id = broadcaster_id
 
     def __call__(self, event):
-        if not isinstance(event, ResourceChanged):
-            return
-
         if event.payload['resource_name'] != 'record':
             return
 
