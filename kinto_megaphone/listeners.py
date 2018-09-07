@@ -26,10 +26,11 @@ class CollectionTimestamp(ListenerBase):
                                        bucket_id=bucket_id,
                                        id=collection_id)
         storage = event.request.registry.storage
-        etag = storage.collection_timestamp('record', parent_id)
+        timestamp = storage.collection_timestamp('record', parent_id)
+        etag = '"{}"'.format(timestamp)
         self.client.send_version(self.broadcaster_id,
                                  '{}_{}'.format(bucket_id, collection_id),
-                                 '"{}"'.format(etag))
+                                 etag)
 
 
 def load_from_config(config, prefix):
