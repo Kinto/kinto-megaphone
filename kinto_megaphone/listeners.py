@@ -7,7 +7,7 @@ from . import megaphone
 DEFAULT_SETTINGS = {}
 
 
-class CollectionTimestamp(ListenerBase):
+class CollectionTimestampListener(ListenerBase):
     """An event listener that pushes all collection timestamps to Megaphone."""
     def __init__(self, client, broadcaster_id):
         self.client = client
@@ -49,4 +49,4 @@ def load_from_config(config, prefix):
     broadcaster_id = settings[prefix + 'broadcaster_id']
 
     client = megaphone.Megaphone(url, api_key)
-    return CollectionTimestamp(client, broadcaster_id)
+    return CollectionTimestampListener(client, broadcaster_id)

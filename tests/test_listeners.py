@@ -7,7 +7,7 @@ from kinto.core import events
 from kinto.core.testing import DummyRequest
 from pyramid.config import Configurator, ConfigurationError
 
-from kinto_megaphone.listeners import load_from_config, CollectionTimestamp
+from kinto_megaphone.listeners import load_from_config, CollectionTimestampListener
 from kinto_megaphone.megaphone import BearerAuth
 
 
@@ -83,7 +83,7 @@ def test_kinto_megaphone_complains_about_missing_broadcaster_id():
 
 def test_kinto_listener_puts_version():
     client = mock.Mock()
-    listener = CollectionTimestamp(client, 'broadcaster')
+    listener = CollectionTimestampListener(client, 'broadcaster')
     payload = {
         'timestamp': '123',
         'action': events.ACTIONS.CREATE,
@@ -107,7 +107,7 @@ def test_kinto_listener_puts_version():
 
 def test_kinto_listener_ignores_reads():
     client = mock.Mock()
-    listener = CollectionTimestamp(client, 'broadcaster')
+    listener = CollectionTimestampListener(client, 'broadcaster')
     payload = {
         'timestamp': '123',
         'action': events.ACTIONS.CREATE,
@@ -130,7 +130,7 @@ def test_kinto_listener_ignores_reads():
 
 def test_kinto_listener_ignores_writes_not_on_records():
     client = mock.Mock()
-    listener = CollectionTimestamp(client, 'broadcaster')
+    listener = CollectionTimestampListener(client, 'broadcaster')
     payload = {
         'timestamp': '123',
         'action': events.ACTIONS.CREATE,
