@@ -22,10 +22,10 @@ class CollectionTimestamp(ListenerBase):
 
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
-        storage = event.request.registry.storage
         parent_id = utils.instance_uri(event.request, 'collection',
                                        bucket_id=bucket_id,
                                        id=collection_id)
+        storage = event.request.registry.storage
         etag = storage.collection_timestamp('record', parent_id)
         self.client.send_version(self.broadcaster_id,
                                  '{}_{}'.format(bucket_id, collection_id),
