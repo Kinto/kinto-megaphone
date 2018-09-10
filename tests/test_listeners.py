@@ -53,28 +53,25 @@ def kinto_app(megaphone_settings):
     return app
 
 
-def test_kinto_megaphone_complains_about_missing_key():
-    settings = megaphone_settings()
-    del settings['event_listeners.mp.api_key']
-    config = Configurator(settings=settings)
+def test_kinto_megaphone_complains_about_missing_key(megaphone_settings):
+    del megaphone_settings['event_listeners.mp.api_key']
+    config = Configurator(settings=megaphone_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
     assert excinfo.value.args[0] == "Megaphone API key must be provided for event_listeners.mp."
 
 
-def test_kinto_megaphone_complains_about_missing_url():
-    settings = megaphone_settings()
-    del settings['event_listeners.mp.url']
-    config = Configurator(settings=settings)
+def test_kinto_megaphone_complains_about_missing_url(megaphone_settings):
+    del megaphone_settings['event_listeners.mp.url']
+    config = Configurator(settings=megaphone_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
     assert excinfo.value.args[0] == "Megaphone URL must be provided for event_listeners.mp."
 
 
-def test_kinto_megaphone_complains_about_missing_broadcaster_id():
-    settings = megaphone_settings()
-    del settings['event_listeners.mp.broadcaster_id']
-    config = Configurator(settings=settings)
+def test_kinto_megaphone_complains_about_missing_broadcaster_id(megaphone_settings):
+    del megaphone_settings['event_listeners.mp.broadcaster_id']
+    config = Configurator(settings=megaphone_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
     error_msg = "Megaphone broadcaster_id must be provided for event_listeners.mp."
