@@ -25,6 +25,7 @@ def get_request_class(prefix):
 @pytest.fixture
 def megaphone_settings():
     return {
+        'project_name': 'kinto megaphone test',
         'event_listeners': 'mp',
         'event_listeners.mp.use': 'kinto_megaphone.listeners',
         'event_listeners.mp.api_key': 'token',
