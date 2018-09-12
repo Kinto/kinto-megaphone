@@ -17,6 +17,7 @@ with codecs.open(os.path.join(here, 'CONTRIBUTORS.rst'),
 
 REQUIREMENTS = [
     'kinto',
+    'requests',
 ]
 
 DEPENDENCY_LINKS = []
