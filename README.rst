@@ -38,6 +38,6 @@ Add it using configuration like::
 
 Every listener also needs the following settings (with real values)::
 
-  kinto.event_listeners.foo.api_key = foobar
-  kinto.event_listeners.foo.url = http://megaphone.example.com/
-  kinto.event_listeners.foo.broadcaster_id = remote-settings
+  kinto.event_listeners.mp.api_key = foobar
+  kinto.event_listeners.mp.url = http://megaphone.example.com/
+  kinto.event_listeners.mp.broadcaster_id = remote-settings
