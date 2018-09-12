@@ -28,8 +28,15 @@ Install the Python package:
     pip install kinto-megaphone
 
 
-Then, you'll want to add a listener. kinto-megaphone only offers one
-kind of listener right now, but that could change later.
+Then, you'll want to add a listener.
+
+The kinto-megaphone listener is called CollectionTimestampListener and
+it notifies megaphone with the new collection timestamp every time it
+changes. If talking to megaphone fails, it will abort the request (including
+rollback the changes made in the request).
+
+kinto-megaphone only offers this one kind of listener right
+now, but that could change later.
 
 Add it using configuration like::
 
