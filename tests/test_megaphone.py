@@ -24,6 +24,29 @@ def test_megaphone_send_put_failure_raises(requests):
     assert excinfo.value == e
 
 
+def test_megaphone_auth_not_required():
+    megaphone.Megaphone('http://example.com/', None)
+
+
+def test_megaphone_auth_required_for_push():
+    m = megaphone.Megaphone('http://example.com/', None)
+    with pytest.raises(ValueError) as exc:
+        m.send_version('bid', 'chanid', 'myversion')
+    assert 'auth' in exc.value.args[0]
+
+
+@mock.patch('kinto_megaphone.megaphone.requests')
+def test_megaphone_heartbeat_succeed(requests):
+    m = megaphone.Megaphone('http://example.com/', None)
+    success = requests.get.return_value.json.return_value = {
+        # A typical "success" from Megaphone.
+        "code": 200,
+        "database": "ok",
+        "status": "ok"
+    }
+    assert m.heartbeat() == success
+
+
 def test_bearer_auth_adds_auth_header():
     r = mock.MagicMock()
     r.headers = {}
