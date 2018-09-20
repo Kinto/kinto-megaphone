@@ -16,7 +16,7 @@ with codecs.open(os.path.join(here, 'CONTRIBUTORS.rst'),
 
 
 REQUIREMENTS = [
-    'kinto',
+    'kinto >= 10.1.1',
     'requests',
 ]
 
