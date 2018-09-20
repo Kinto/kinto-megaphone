@@ -33,6 +33,7 @@ def megaphone_settings():
         'event_listeners.mp.broadcaster_id': 'bcast',
         'bucket_create_principals': 'system.Everyone',
         'collection_create_principals': 'system.Everyone',
+        'includes': 'kinto_megaphone',
     }
 
 
@@ -139,3 +140,20 @@ def test_kinto_app_puts_version(requests, kinto_app):
     requests.put.assert_called_with('http://megaphone.example.com/v1/broadcasts/bcast/food_french',
                                     auth=BearerAuth('token'),
                                     data=records_etag)
+
+
+@mock.patch('kinto_megaphone.megaphone.requests')
+def test_kinto_app_adds_heartbeat(requests, kinto_app):
+    requests.get.return_value.json.return_value = {
+        "code": 200,
+        "database": "ok",
+        "status": "ok",
+    }
+
+    resp = kinto_app.get('/__heartbeat__')
+
+    assert requests.get.call_count == 1
+    requests.get.assert_called_with('http://megaphone.example.com/__heartbeat__')
+
+    assert 'megaphone' in resp.json
+    assert resp.json['megaphone']

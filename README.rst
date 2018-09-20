@@ -28,6 +28,10 @@ Install the Python package:
     pip install kinto-megaphone
 
 
+Add it to kinto.includes::
+
+    kinto.includes = kinto_megaphone
+
 Then, you'll want to add a listener.
 
 The kinto-megaphone listener is called CollectionTimestampListener and
