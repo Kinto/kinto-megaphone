@@ -1,6 +1,5 @@
 from pyramid.config import ConfigurationError
 from kinto.core.listeners import ListenerBase
-from kinto.core import utils
 from . import megaphone
 
 DEFAULT_SETTINGS = {}
