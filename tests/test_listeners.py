@@ -96,11 +96,10 @@ def test_kinto_listener_puts_version():
         {'new': {'id': 'abcd'}}
     ]
     request = DummyRequest()
-    request.registry.storage.collection_timestamp.return_value = 125
     event = events.ResourceChanged(payload, single_record, request)
 
     listener(event)
-    client.send_version.assert_called_with('broadcaster', 'food_french', '"125"')
+    client.send_version.assert_called_with('broadcaster', 'food_french', '"123"')
 
 
 def test_kinto_listener_ignores_writes_not_on_records():
