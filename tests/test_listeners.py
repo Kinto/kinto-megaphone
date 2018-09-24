@@ -157,3 +157,12 @@ def test_kinto_app_adds_heartbeat(requests, kinto_app):
 
     assert 'megaphone' in resp.json
     assert resp.json['megaphone']
+
+
+def test_kinto_app_adds_capability(kinto_app):
+    resp = kinto_app.get('/')
+    capabilities = resp.json['capabilities']
+    assert 'megaphone' in capabilities
+    megaphone = capabilities['megaphone']
+    assert 'broadcast' in megaphone['description'].lower()
+    assert megaphone['url'] == 'https://github.com/Kinto/kinto-megaphone'

@@ -11,3 +11,8 @@ def includeme(config):
     anon_client = Megaphone(find_megaphone_url(config.registry), None)
 
     config.registry.heartbeats['megaphone'] = MegaphoneHeartbeat(anon_client)
+    config.add_api_capability(
+        "megaphone",
+        version=__version__,
+        description="Broadcast collection updates via megaphone",
+        url="https://github.com/Kinto/kinto-megaphone")
