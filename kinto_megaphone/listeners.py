@@ -1,6 +1,5 @@
-from pyramid.config import ConfigurationError
 from kinto.core.listeners import ListenerBase
-from . import megaphone
+from . import megaphone, validate_config
 
 DEFAULT_SETTINGS = {}
 
@@ -25,19 +24,6 @@ class CollectionTimestampListener(ListenerBase):
 
 
 def load_from_config(config, prefix):
-    settings = config.get_settings()
-
-    if prefix + 'api_key' not in settings:
-        raise ConfigurationError("Megaphone API key must be provided for {}".format(prefix))
-    api_key = settings[prefix + 'api_key']
-
-    if prefix + 'url' not in settings:
-        raise ConfigurationError("Megaphone URL must be provided for {}".format(prefix))
-    url = settings[prefix + 'url']
-
-    if prefix + 'broadcaster_id' not in settings:
-        raise ConfigurationError("Megaphone broadcaster_id must be provided for {}".format(prefix))
-    broadcaster_id = settings[prefix + 'broadcaster_id']
-
-    client = megaphone.Megaphone(url, api_key)
-    return CollectionTimestampListener(client, broadcaster_id)
+    mp_config = validate_config(config, prefix)
+    client = megaphone.Megaphone(mp_config.url, mp_config.api_key)
+    return CollectionTimestampListener(client, mp_config.broadcaster_id)
