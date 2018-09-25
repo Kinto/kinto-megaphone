@@ -36,5 +36,4 @@ class Megaphone(object):
     def heartbeat(self):
         url = '{}/__heartbeat__'.format(self.url)
         resp = requests.get(url)
-        resp.raise_for_status()
-        return resp.json()
+        return resp.status_code == 200

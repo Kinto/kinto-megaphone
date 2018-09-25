@@ -144,11 +144,7 @@ def test_kinto_app_puts_version(requests, kinto_app):
 
 @mock.patch('kinto_megaphone.megaphone.requests')
 def test_kinto_app_adds_heartbeat(requests, kinto_app):
-    requests.get.return_value.json.return_value = {
-        "code": 200,
-        "database": "ok",
-        "status": "ok",
-    }
+    requests.get.return_value.status_code = 200
 
     resp = kinto_app.get('/__heartbeat__')
 

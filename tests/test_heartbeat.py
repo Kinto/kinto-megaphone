@@ -6,11 +6,7 @@ from kinto_megaphone import heartbeat
 def test_heartbeat_calls_heartbeat(megaphone):
     h = heartbeat.MegaphoneHeartbeat(megaphone)
 
-    megaphone.heartbeat.return_value = {
-        "code": 200,
-        "database": "ok",
-        "status": "ok"
-    }
+    megaphone.heartbeat.return_value = True
 
     assert h(None)
 
@@ -19,16 +15,6 @@ def test_heartbeat_calls_heartbeat(megaphone):
 def test_heartbeat_understands_failure(megaphone):
     h = heartbeat.MegaphoneHeartbeat(megaphone)
 
-    # I've never had this response from megaphone.
-    # Instead when I shut down mysql, the megaphone service just
-    # hangs forever while spewing error messages about how it can't
-    # access the database.
-    # Maybe it's possible to get an error message like this, but I
-    # don't know how.
-    megaphone.heartbeat.return_value = {
-        "code": 200,
-        "database": "bad",
-        "status": "ok"
-    }
+    megaphone.heartbeat.return_value = False
 
     assert h(None) is False
