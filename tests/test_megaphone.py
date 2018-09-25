@@ -38,14 +38,14 @@ def test_megaphone_auth_required_for_push():
 @mock.patch('kinto_megaphone.megaphone.requests')
 def test_megaphone_heartbeat_succeed(requests):
     m = megaphone.Megaphone('http://example.com/', None)
-    requests.get.return_value.status_code == 200
+    requests.get.return_value.status_code = 200
     assert m.heartbeat()
 
 
 @mock.patch('kinto_megaphone.megaphone.requests')
 def test_megaphone_heartbeat_fail(requests):
     m = megaphone.Megaphone('http://example.com/', None)
-    requests.get.return_value.status_code == 503
+    requests.get.return_value.status_code = 503
     assert not m.heartbeat()
 
 
