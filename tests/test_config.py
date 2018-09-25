@@ -3,6 +3,7 @@ import pytest
 from pyramid.config import ConfigurationError
 import kinto_megaphone
 
+
 def test_find_megaphone_url_reads_settings():
     registry = mock.Mock()
     registry.settings = {

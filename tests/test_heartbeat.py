@@ -1,7 +1,4 @@
 import mock
-import pytest
-from pyramid.config import ConfigurationError
-
 from kinto_megaphone import heartbeat
 
 
