@@ -4,10 +4,10 @@ Changelog
 This document describes changes between each past release.
 
 
-0.2.3 (unreleased)
+0.2.3 (2018-11-07)
 ------------------
 
-- Nothing changed yet.
+- Remove a broken log message (#10).
 
 
 0.2.2 (2018-11-07)
