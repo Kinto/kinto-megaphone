@@ -4,10 +4,10 @@ Changelog
 This document describes changes between each past release.
 
 
-0.2.1 (unreleased)
+0.2.1 (2018-11-07)
 ------------------
 
-- Nothing changed yet.
+- Add a few log messages to help try to troubleshoot.
 
 
 0.2.0 (2018-09-25)
