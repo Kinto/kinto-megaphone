@@ -15,7 +15,6 @@ class CollectionTimestampListener(ListenerBase):
         self.broadcaster_id = broadcaster_id
 
     def __call__(self, event):
-        logger.info("CollectionTimestampListener:", event)
         if event.payload['resource_name'] != 'record':
             logger.debug("Resource name did not match. Was: {}".format(
                 event.payload['resource_name']))
