@@ -8,25 +8,25 @@ from kinto_megaphone.listeners.collection_timestamp import load_from_config, Col
 from kinto_megaphone.megaphone import BearerAuth
 
 
-def test_kinto_megaphone_complains_about_missing_key(megaphone_settings):
-    del megaphone_settings['event_listeners.mp.api_key']
-    config = Configurator(settings=megaphone_settings)
+def test_kinto_megaphone_complains_about_missing_key(collection_timestamp_settings):
+    del collection_timestamp_settings['event_listeners.mp.api_key']
+    config = Configurator(settings=collection_timestamp_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
     assert excinfo.value.args[0] == "Megaphone API key must be provided for event_listeners.mp."
 
 
-def test_kinto_megaphone_complains_about_missing_url(megaphone_settings):
-    del megaphone_settings['event_listeners.mp.url']
-    config = Configurator(settings=megaphone_settings)
+def test_kinto_megaphone_complains_about_missing_url(collection_timestamp_settings):
+    del collection_timestamp_settings['event_listeners.mp.url']
+    config = Configurator(settings=collection_timestamp_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
     assert excinfo.value.args[0] == "Megaphone URL must be provided for event_listeners.mp."
 
 
-def test_kinto_megaphone_complains_about_missing_broadcaster_id(megaphone_settings):
-    del megaphone_settings['event_listeners.mp.broadcaster_id']
-    config = Configurator(settings=megaphone_settings)
+def test_kinto_megaphone_complains_about_missing_broadcaster_id(collection_timestamp_settings):
+    del collection_timestamp_settings['event_listeners.mp.broadcaster_id']
+    config = Configurator(settings=collection_timestamp_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
     error_msg = "Megaphone broadcaster_id must be provided for event_listeners.mp."

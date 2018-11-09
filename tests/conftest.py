@@ -17,7 +17,7 @@ def get_request_class(prefix):
 
 
 @pytest.fixture
-def megaphone_settings():
+def collection_timestamp_settings():
     return {
         'project_name': 'kinto megaphone test',
         'event_listeners': 'mp',
@@ -32,12 +32,12 @@ def megaphone_settings():
 
 
 @pytest.fixture
-def kinto_app(megaphone_settings):
+def kinto_app(collection_timestamp_settings):
     api_prefix = "v1"
 
     settings = {**kinto.core.DEFAULT_SETTINGS}
     settings.update(kinto.DEFAULT_SETTINGS)
-    settings.update(megaphone_settings)
+    settings.update(collection_timestamp_settings)
 
     config = Configurator(settings=settings)
     kinto.core.initialize(config, version='0.0.1')
