@@ -40,11 +40,11 @@ def kinto_changes_settings():
         'event_listeners.mp.api_key': 'token',
         'event_listeners.mp.url': 'http://megaphone.example.com',
         'event_listeners.mp.broadcaster_id': 'bcast',
-        'event_listeners.mp.match_kinto_changes': '/buckets/a',
+        'event_listeners.mp.match_kinto_changes': '/buckets/a /buckets/z/collections/z1',
         'bucket_create_principals': 'system.Everyone',
         'collection_create_principals': 'system.Everyone',
         'includes': 'kinto_megaphone kinto_changes',
-        'changes.resources': '/buckets/a /buckets/some-random-bucket',
+        'changes.resources': '/buckets/a /buckets/some-random-bucket /buckets/z/collections/z1 /buckets/z/collections/z2',
     }
 
 
