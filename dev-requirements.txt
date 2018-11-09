@@ -1,4 +1,5 @@
 flake8
+kinto-changes
 mock
 pytest==3.9.3
 pytest-cache

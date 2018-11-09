@@ -1,7 +1,10 @@
 import logging
 
+from pyramid.config import ConfigurationError
+import pyramid.events
 from pyramid.settings import aslist
 
+from kinto.core import utils
 from .. import megaphone, validate_config
 from . import collection_timestamp
 
@@ -22,12 +25,46 @@ class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
     timestamps when certain monitored collections change.
 
     """
-    def __init__(self, client, broadcaster_id, resources):
+    def __init__(self, client, broadcaster_id, raw_resources, resources=None):
         super().__init__(client, broadcaster_id)
-        self.resources = resources
+        self.raw_resources = raw_resources
+        # Used for testing, to pass parsed resources without having to
+        # scan views etc.
+        if resources:
+            self.resources = resources
+
+    def _convert_resources(self, event):
+        self.resources = [utils.view_lookup_registry(event.app.registry, r) for r in self.raw_resources]
 
     def filter_records(self, impacted_records):
-        return impacted_records
+        ret = []
+        for delta in impacted_records:
+            if 'new' not in delta:
+                continue  # skip deletes
+            record = delta['new']
+            record_bucket = record['bucket']
+            record_collection = record['collection']
+            for (resource_name, matchdict) in self.resources:
+                if resource_name == 'bucket':
+                    resource_bucket = matchdict['id']
+                else:
+                    resource_bucket = matchdict.get('bucket_id')
+
+                if resource_name == 'collection':
+                    resource_collection = matchdict['id']
+                else:
+                    resource_collection = matchdict.get('collection_id')
+
+                if resource_bucket and resource_bucket != record_bucket:
+                    continue
+
+                if resource_collection and resource_collection != record_collection:
+                    continue
+
+                ret.append(record)
+
+        return ret
+
 
     def __call__(self, event):
         if event.payload['resource_name'] != 'record':
@@ -61,4 +98,7 @@ def load_from_config(config, prefix):
     resources = aslist(settings[prefix + "match_kinto_changes"])
 
     client = megaphone.Megaphone(mp_config.url, mp_config.api_key)
-    return KintoChangesListener(client, mp_config.broadcaster_id, resources)
+    listener = KintoChangesListener(client, mp_config.broadcaster_id, resources)
+    config.add_subscriber(listener._convert_resources,
+                          pyramid.events.ApplicationCreated)
+    return listener

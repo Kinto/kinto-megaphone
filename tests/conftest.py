@@ -32,6 +32,23 @@ def collection_timestamp_settings():
 
 
 @pytest.fixture
+def kinto_changes_settings():
+    return {
+        'project_name': 'kinto megaphone test',
+        'event_listeners': 'mp',
+        'event_listeners.mp.use': 'kinto_megaphone.listeners.kinto_changes',
+        'event_listeners.mp.api_key': 'token',
+        'event_listeners.mp.url': 'http://megaphone.example.com',
+        'event_listeners.mp.broadcaster_id': 'bcast',
+        'event_listeners.mp.match_kinto_changes': '/buckets/a',
+        'bucket_create_principals': 'system.Everyone',
+        'collection_create_principals': 'system.Everyone',
+        'includes': 'kinto_megaphone kinto_changes',
+        'changes.resources': '/buckets/a /buckets/some-random-bucket',
+    }
+
+
+@pytest.fixture
 def kinto_app(collection_timestamp_settings):
     api_prefix = "v1"
 
@@ -40,6 +57,10 @@ def kinto_app(collection_timestamp_settings):
     settings.update(collection_timestamp_settings)
 
     config = Configurator(settings=settings)
+
+    # FIXME: https://github.com/Kinto/kinto-changes/issues/49
+    config.registry.command = 'start'
+
     kinto.core.initialize(config, version='0.0.1')
     config.scan("kinto.views")
 
