@@ -1,6 +1,5 @@
 import mock
 import pytest
-import kinto.core
 from kinto.core import events
 from kinto.core.testing import DummyRequest
 from pyramid.config import Configurator, ConfigurationError
@@ -11,12 +10,14 @@ import conftest
 
 
 @pytest.fixture
-def kinto_changes_listener_match_buckets_a():
+def match_buckets_a_resource():
     return [('bucket', {'id': 'a'})]
 
+
 @pytest.fixture
-def kinto_changes_listener_match_collection_z1():
+def match_collection_z1_resource():
     return [('collection', {'id': 'z1', 'bucket_id': 'z'})]
+
 
 PAYLOAD = {
     'timestamp': '123',
@@ -46,12 +47,14 @@ def test_kinto_changes_complains_about_missing_config_param(kinto_changes_settin
     config = Configurator(settings=kinto_changes_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
-    assert excinfo.value.args[0] == "Resources to filter must be provided to kinto_changes using match_kinto_changes"
+    ERROR_MSG = "Resources to filter must be provided to kinto_changes" \
+        " using match_kinto_changes"
+    assert excinfo.value.args[0] == ERROR_MSG
 
 
-def test_kinto_changes_ignores_not_monitor_changes(kinto_changes_listener_match_buckets_a):
+def test_kinto_changes_ignores_not_monitor_changes(match_buckets_a_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
+    listener = KintoChangesListener(client, 'broadcaster', [], match_buckets_a_resource)
     payload = {
         **PAYLOAD,
         'bucket_id': 'food',
@@ -67,9 +70,9 @@ def test_kinto_changes_ignores_not_monitor_changes(kinto_changes_listener_match_
     assert not client.send_version.called
 
 
-def test_kinto_changes_listener_ignores_writes_not_on_records(kinto_changes_listener_match_buckets_a):
+def test_kcl_ignores_writes_not_on_records(match_buckets_a_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
+    listener = KintoChangesListener(client, 'broadcaster', [], match_buckets_a_resource)
     payload = {
         **PAYLOAD,
         'resource_name': 'collection',
@@ -84,9 +87,9 @@ def test_kinto_changes_listener_ignores_writes_not_on_records(kinto_changes_list
     assert not client.send_version.called
 
 
-def test_kinto_changes_listener_ignores_missing_new(kinto_changes_listener_match_buckets_a):
+def test_kcl_ignores_missing_new(match_buckets_a_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
+    listener = KintoChangesListener(client, 'broadcaster', [], match_buckets_a_resource)
     single_record = [
         {'old': changes_record('a', 'c')},
     ]
@@ -97,9 +100,9 @@ def test_kinto_changes_listener_ignores_missing_new(kinto_changes_listener_match
     assert not client.send_version.called
 
 
-def test_kinto_changes_listener_drops_events_with_no_matching_records(kinto_changes_listener_match_buckets_a):
+def test_kcl_drops_events_with_no_matching_records(match_buckets_a_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
+    listener = KintoChangesListener(client, 'broadcaster', [], match_buckets_a_resource)
     single_record = [
         {'new': changes_record('b', 'c')},
     ]
@@ -110,9 +113,10 @@ def test_kinto_changes_listener_drops_events_with_no_matching_records(kinto_chan
     assert not client.send_version.called
 
 
-def test_kinto_changes_listener_posts_on_matching_records(kinto_changes_listener_match_buckets_a):
+def test_kcl_posts_on_matching_records(match_buckets_a_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
+    listener = KintoChangesListener(client, 'broadcaster', [],
+                                    match_buckets_a_resource)
     single_record = [
         {'new': changes_record('a', 'c')},
     ]
@@ -123,9 +127,10 @@ def test_kinto_changes_listener_posts_on_matching_records(kinto_changes_listener
     client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
 
 
-def test_kinto_changes_listener_calls_with_some_matching_records(kinto_changes_listener_match_buckets_a):
+def test_kcl_calls_with_some_matching_records(match_buckets_a_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
+    listener = KintoChangesListener(client, 'broadcaster', [],
+                                    match_buckets_a_resource)
     two_records = [
         {'new': changes_record('b', 'c')},
         {'new': changes_record('a', 'c')},
@@ -137,9 +142,10 @@ def test_kinto_changes_listener_calls_with_some_matching_records(kinto_changes_l
     client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
 
 
-def test_kinto_changes_listener_can_match_in_collections(kinto_changes_listener_match_collection_z1):
+def test_kcl_can_match_in_collections(match_collection_z1_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_collection_z1)
+    listener = KintoChangesListener(client, 'broadcaster', [],
+                                    match_collection_z1_resource)
     one_record = [
         {'new': changes_record('z', 'z1')},
     ]
@@ -150,9 +156,10 @@ def test_kinto_changes_listener_can_match_in_collections(kinto_changes_listener_
     client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
 
 
-def test_kinto_changes_listener_can_fail_to_match_in_collections(kinto_changes_listener_match_collection_z1):
+def test_kcl_can_fail_to_match_in_collections(match_collection_z1_resource):
     client = mock.Mock()
-    listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_collection_z1)
+    listener = KintoChangesListener(client, 'broadcaster', [],
+                                    match_collection_z1_resource)
     one_record = [
         {'new': changes_record('z', 'z2')},
     ]
@@ -176,15 +183,17 @@ def test_kinto_app_puts_version(requests, kinto_changes_settings):
     assert records_etag == collection_etag
 
     assert requests.put.call_count == 1
-    requests.put.assert_called_with('http://megaphone.example.com/v1/broadcasts/bcast/monitor_changes',
+    monitor_changes_endpoint = 'http://megaphone.example.com/v1/broadcasts/bcast/monitor_changes'
+    requests.put.assert_called_with(monitor_changes_endpoint,
                                     auth=BearerAuth('token'),
                                     data=records_etag)
+
 
 @mock.patch('kinto_megaphone.megaphone.requests')
 def test_kinto_app_ignores_other_kinto_changes_version(requests, kinto_changes_settings):
     app = conftest.kinto_app(kinto_changes_settings)
     app.put_json('/buckets/some-random-bucket', {})
     app.put_json('/buckets/some-random-bucket/collections/a_1', {})
-    resp = app.put_json('/buckets/some-random-bucket/collections/a_1/records/a_1_2', {})
+    app.put_json('/buckets/some-random-bucket/collections/a_1/records/a_1_2', {})
 
     assert not requests.put.called

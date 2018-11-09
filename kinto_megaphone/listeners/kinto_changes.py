@@ -34,7 +34,10 @@ class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
             self.resources = resources
 
     def _convert_resources(self, event):
-        self.resources = [utils.view_lookup_registry(event.app.registry, r) for r in self.raw_resources]
+        self.resources = [
+            utils.view_lookup_registry(event.app.registry, r)
+            for r in self.raw_resources
+        ]
 
     def filter_records(self, impacted_records):
         ret = []
@@ -65,7 +68,6 @@ class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
 
         return ret
 
-
     def __call__(self, event):
         if event.payload['resource_name'] != 'record':
             logger.debug("Resource name did not match. Was: {}".format(
@@ -88,13 +90,14 @@ class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
         return super().__call__(filtered_event)
 
 
-
 def load_from_config(config, prefix):
     mp_config = validate_config(config, prefix)
 
     settings = config.get_settings()
     if prefix + "match_kinto_changes" not in settings:
-        raise ConfigurationError("Resources to filter must be provided to kinto_changes using match_kinto_changes")
+        ERROR_MSG = "Resources to filter must be provided to kinto_changes " \
+            "using match_kinto_changes"
+        raise ConfigurationError(ERROR_MSG)
     resources = aslist(settings[prefix + "match_kinto_changes"])
 
     client = megaphone.Megaphone(mp_config.url, mp_config.api_key)

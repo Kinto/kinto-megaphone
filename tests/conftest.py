@@ -44,7 +44,12 @@ def kinto_changes_settings():
         'bucket_create_principals': 'system.Everyone',
         'collection_create_principals': 'system.Everyone',
         'includes': 'kinto_megaphone kinto_changes',
-        'changes.resources': '/buckets/a /buckets/some-random-bucket /buckets/z/collections/z1 /buckets/z/collections/z2',
+        'changes.resources': ' '.join([
+            '/buckets/a',
+            '/buckets/some-random-bucket',
+            '/buckets/z/collections/z1',
+            '/buckets/z/collections/z2',
+        ]),
     }
 
 
