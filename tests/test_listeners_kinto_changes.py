@@ -18,6 +18,17 @@ def kinto_changes_listener_match_buckets_a():
 def kinto_changes_listener_match_collection_z1():
     return [('collection', {'id': 'z1', 'bucket_id': 'z'})]
 
+PAYLOAD = {
+    'timestamp': '123',
+    'action': events.ACTIONS.CREATE,
+    'uri': 'abcd',
+    'user_id': 'accounts:eglassercamp@mozilla.com',
+    'resource_name': 'record',
+    'bucket_id': 'monitor',
+    'collection_id': 'changes',
+    'id': 'blahblah',
+}
+
 def test_kinto_changes_complains_about_missing_config_param(kinto_changes_settings):
     del kinto_changes_settings['event_listeners.mp.match_kinto_changes']
     config = Configurator(settings=kinto_changes_settings)
@@ -30,14 +41,9 @@ def test_kinto_changes_ignores_not_monitor_changes(kinto_changes_listener_match_
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
     payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
+        **PAYLOAD,
         'bucket_id': 'food',
         'collection_id': 'french',
-        'id': 'blahblah',
     }
     single_record = [
         {'new': {'id': 'abcd'}}
@@ -53,14 +59,8 @@ def test_kinto_changes_listener_ignores_writes_not_on_records(kinto_changes_list
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
     payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
+        **PAYLOAD,
         'resource_name': 'collection',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
     }
     single_record = [
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'a', 'collection': 'c', 'host': 'http://localhost'}}
@@ -75,21 +75,11 @@ def test_kinto_changes_listener_ignores_writes_not_on_records(kinto_changes_list
 def test_kinto_changes_listener_ignores_missing_new(kinto_changes_listener_match_buckets_a):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
-    }
     single_record = [
         {'old': {'id': 'abcd', 'last_modified': 123, 'bucket': 'a', 'collection': 'c', 'host': 'http://localhost'}}
     ]
     request = DummyRequest()
-    event = events.ResourceChanged(payload, single_record, request)
+    event = events.ResourceChanged(PAYLOAD, single_record, request)
 
     listener(event)
     assert not client.send_version.called
@@ -98,21 +88,11 @@ def test_kinto_changes_listener_ignores_missing_new(kinto_changes_listener_match
 def test_kinto_changes_listener_drops_events_with_no_matching_records(kinto_changes_listener_match_buckets_a):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
-    }
     single_record = [
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'b', 'collection': 'c', 'host': 'http://localhost'}}
     ]
     request = DummyRequest()
-    event = events.ResourceChanged(payload, single_record, request)
+    event = events.ResourceChanged(PAYLOAD, single_record, request)
 
     listener(event)
     assert not client.send_version.called
@@ -121,21 +101,11 @@ def test_kinto_changes_listener_drops_events_with_no_matching_records(kinto_chan
 def test_kinto_changes_listener_posts_on_matching_records(kinto_changes_listener_match_buckets_a):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
-    }
     single_record = [
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'a', 'collection': 'c', 'host': 'http://localhost'}}
     ]
     request = DummyRequest()
-    event = events.ResourceChanged(payload, single_record, request)
+    event = events.ResourceChanged(PAYLOAD, single_record, request)
 
     listener(event)
     client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
@@ -144,22 +114,12 @@ def test_kinto_changes_listener_posts_on_matching_records(kinto_changes_listener
 def test_kinto_changes_listener_calls_with_some_matching_records(kinto_changes_listener_match_buckets_a):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_buckets_a)
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
-    }
     two_records = [
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'b', 'collection': 'c', 'host': 'http://localhost'}},
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'a', 'collection': 'c', 'host': 'http://localhost'}}
     ]
     request = DummyRequest()
-    event = events.ResourceChanged(payload, two_records, request)
+    event = events.ResourceChanged(PAYLOAD, two_records, request)
 
     listener(event)
     client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
@@ -168,21 +128,11 @@ def test_kinto_changes_listener_calls_with_some_matching_records(kinto_changes_l
 def test_kinto_changes_listener_can_match_in_collections(kinto_changes_listener_match_collection_z1):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_collection_z1)
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
-    }
     one_record = [
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'z', 'collection': 'z1', 'host': 'http://localhost'}},
     ]
     request = DummyRequest()
-    event = events.ResourceChanged(payload, one_record, request)
+    event = events.ResourceChanged(PAYLOAD, one_record, request)
 
     listener(event)
     client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
@@ -191,21 +141,11 @@ def test_kinto_changes_listener_can_match_in_collections(kinto_changes_listener_
 def test_kinto_changes_listener_can_fail_to_match_in_collections(kinto_changes_listener_match_collection_z1):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], kinto_changes_listener_match_collection_z1)
-    payload = {
-        'timestamp': '123',
-        'action': events.ACTIONS.CREATE,
-        'uri': 'abcd',
-        'user_id': 'accounts:eglassercamp@mozilla.com',
-        'resource_name': 'record',
-        'bucket_id': 'monitor',
-        'collection_id': 'changes',
-        'id': 'french',
-    }
     one_record = [
         {'new': {'id': 'abcd', 'last_modified': 123, 'bucket': 'z', 'collection': 'z2', 'host': 'http://localhost'}},
     ]
     request = DummyRequest()
-    event = events.ResourceChanged(payload, one_record, request)
+    event = events.ResourceChanged(PAYLOAD, one_record, request)
 
     listener(event)
     assert not client.send_version.called
