@@ -4,7 +4,7 @@ from kinto.core import events
 from kinto.core.testing import DummyRequest
 from pyramid.config import Configurator, ConfigurationError
 
-from kinto_megaphone.listeners import load_from_config, CollectionTimestampListener
+from kinto_megaphone.listeners.collection_timestamp import load_from_config, CollectionTimestampListener
 from kinto_megaphone.megaphone import BearerAuth
 
 

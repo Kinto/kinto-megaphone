@@ -1,7 +1,7 @@
 import logging
 
 from kinto.core.listeners import ListenerBase
-from . import megaphone, validate_config
+from .. import megaphone, validate_config
 
 DEFAULT_SETTINGS = {}
 
