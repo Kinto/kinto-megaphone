@@ -5,15 +5,15 @@ import pyramid.events
 from pyramid.settings import aslist
 
 from kinto.core import utils
-from .. import megaphone, validate_config
-from . import collection_timestamp
+from kinto.core.listeners import ListenerBase
+from . import megaphone, validate_config
 
 DEFAULT_SETTINGS = {}
 
 logger = logging.getLogger(__name__)
 
 
-class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
+class KintoChangesListener(ListenerBase):
     """An event listener that's specialized for handling kinto-changes feeds.
 
     We have a plan to allow customizing event listeners to listen for
@@ -26,7 +26,8 @@ class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
 
     """
     def __init__(self, client, broadcaster_id, raw_resources, resources=None):
-        super().__init__(client, broadcaster_id)
+        self.client = client
+        self.broadcaster_id = broadcaster_id
         self.raw_resources = raw_resources
         # Used for testing, to pass parsed resources without having to
         # scan views etc.
@@ -87,7 +88,18 @@ class KintoChangesListener(collection_timestamp.CollectionTimestampListener):
 
         filtered_event = type(event)(event.payload, matching_records, event.request)
 
-        return super().__call__(filtered_event)
+        return self.send_notification(filtered_event)
+
+    def send_notification(self, event):
+        bucket_id = event.payload['bucket_id']
+        collection_id = event.payload['collection_id']
+        timestamp = event.payload['timestamp']
+        etag = '"{}"'.format(timestamp)
+        service_id = '{}_{}'.format(bucket_id, collection_id)
+        logger.info("Sending version: {}, {}".format(self.broadcaster_id, service_id))
+        self.client.send_version(self.broadcaster_id,
+                                 service_id,
+                                 etag)
 
 
 def load_from_config(config, prefix):

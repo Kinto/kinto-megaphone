@@ -4,9 +4,11 @@ from kinto.core import events
 from kinto.core.testing import DummyRequest
 from pyramid.config import Configurator, ConfigurationError
 
-from kinto_megaphone.listeners.kinto_changes import load_from_config, KintoChangesListener
+from kinto_megaphone.listeners import (
+    load_from_config,
+    KintoChangesListener,
+    )
 from kinto_megaphone.megaphone import BearerAuth
-import conftest
 
 
 @pytest.fixture
@@ -40,6 +42,31 @@ def changes_record(bucket_id, collection_id):
         'collection': collection_id,
         'host': 'http://localhost',
     }
+
+
+def test_kinto_megaphone_complains_about_missing_key(kinto_changes_settings):
+    del kinto_changes_settings['event_listeners.mp.api_key']
+    config = Configurator(settings=kinto_changes_settings)
+    with pytest.raises(ConfigurationError) as excinfo:
+        load_from_config(config, 'event_listeners.mp.')
+    assert excinfo.value.args[0] == "Megaphone API key must be provided for event_listeners.mp."
+
+
+def test_kinto_megaphone_complains_about_missing_url(kinto_changes_settings):
+    del kinto_changes_settings['event_listeners.mp.url']
+    config = Configurator(settings=kinto_changes_settings)
+    with pytest.raises(ConfigurationError) as excinfo:
+        load_from_config(config, 'event_listeners.mp.')
+    assert excinfo.value.args[0] == "Megaphone URL must be provided for event_listeners.mp."
+
+
+def test_kinto_megaphone_complains_about_missing_broadcaster_id(kinto_changes_settings):
+    del kinto_changes_settings['event_listeners.mp.broadcaster_id']
+    config = Configurator(settings=kinto_changes_settings)
+    with pytest.raises(ConfigurationError) as excinfo:
+        load_from_config(config, 'event_listeners.mp.')
+    error_msg = "Megaphone broadcaster_id must be provided for event_listeners.mp."
+    assert excinfo.value.args[0] == error_msg
 
 
 def test_kinto_changes_complains_about_missing_config_param(kinto_changes_settings):
@@ -171,8 +198,8 @@ def test_kcl_can_fail_to_match_in_collections(match_collection_z1_resource):
 
 
 @mock.patch('kinto_megaphone.megaphone.requests')
-def test_kinto_app_puts_version(requests, kinto_changes_settings):
-    app = conftest.kinto_app(kinto_changes_settings)
+def test_kinto_app_puts_version(requests, kinto_app):
+    app = kinto_app
     app.put_json('/buckets/a', {})
     app.put_json('/buckets/a/collections/a_1', {})
     resp = app.put_json('/buckets/a/collections/a_1/records/a_1_2', {})
@@ -190,8 +217,8 @@ def test_kinto_app_puts_version(requests, kinto_changes_settings):
 
 
 @mock.patch('kinto_megaphone.megaphone.requests')
-def test_kinto_app_ignores_other_kinto_changes_version(requests, kinto_changes_settings):
-    app = conftest.kinto_app(kinto_changes_settings)
+def test_kinto_app_ignores_other_kinto_changes_version(requests, kinto_app):
+    app = kinto_app
     app.put_json('/buckets/some-random-bucket', {})
     app.put_json('/buckets/some-random-bucket/collections/a_1', {})
     app.put_json('/buckets/some-random-bucket/collections/a_1/records/a_1_2', {})

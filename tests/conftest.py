@@ -17,26 +17,11 @@ def get_request_class(prefix):
 
 
 @pytest.fixture
-def collection_timestamp_settings():
-    return {
-        'project_name': 'kinto megaphone test',
-        'event_listeners': 'mp',
-        'event_listeners.mp.use': 'kinto_megaphone.listeners.collection_timestamp',
-        'event_listeners.mp.api_key': 'token',
-        'event_listeners.mp.url': 'http://megaphone.example.com',
-        'event_listeners.mp.broadcaster_id': 'bcast',
-        'bucket_create_principals': 'system.Everyone',
-        'collection_create_principals': 'system.Everyone',
-        'includes': 'kinto_megaphone',
-    }
-
-
-@pytest.fixture
 def kinto_changes_settings():
     return {
         'project_name': 'kinto megaphone test',
         'event_listeners': 'mp',
-        'event_listeners.mp.use': 'kinto_megaphone.listeners.kinto_changes',
+        'event_listeners.mp.use': 'kinto_megaphone.listeners',
         'event_listeners.mp.api_key': 'token',
         'event_listeners.mp.url': 'http://megaphone.example.com',
         'event_listeners.mp.broadcaster_id': 'bcast',
@@ -54,12 +39,12 @@ def kinto_changes_settings():
 
 
 @pytest.fixture
-def kinto_app(collection_timestamp_settings):
+def kinto_app(kinto_changes_settings):
     api_prefix = "v1"
 
     settings = {**kinto.core.DEFAULT_SETTINGS}
     settings.update(kinto.DEFAULT_SETTINGS)
-    settings.update(collection_timestamp_settings)
+    settings.update(kinto_changes_settings)
 
     config = Configurator(settings=settings)
 
