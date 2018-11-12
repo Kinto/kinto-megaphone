@@ -54,3 +54,7 @@ Add it using configuration like::
   kinto.event_listeners.mp.url = http://megaphone.example.com/
   kinto.event_listeners.mp.broadcaster_id = remote-settings
   kinto.event_listeners.mp.match_kinto_changes = /buckets/main /buckets/blocklists/collections/addons /buckets/blocklists/collections/gfx
+
+Note that the ``match_kinto_changes`` configuration only lets you
+describe resources that are tracked by kinto-changes -- you won't be
+able to put e.g. groups or accounts in there.
