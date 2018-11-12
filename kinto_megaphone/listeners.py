@@ -6,6 +6,7 @@ from pyramid.settings import aslist
 
 from kinto.core import utils
 from kinto.core.listeners import ListenerBase
+from kinto_changes import MONITOR_BUCKET, CHANGES_COLLECTION
 from . import megaphone, validate_config
 
 DEFAULT_SETTINGS = {}
@@ -77,7 +78,7 @@ class KintoChangesListener(ListenerBase):
 
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
-        if bucket_id != 'monitor' or collection_id != 'changes':
+        if bucket_id != MONITOR_BUCKET or collection_id != CHANGES_COLLECTION:
             logger.debug("Event was not for monitor/changes; discarding")
             return
 
