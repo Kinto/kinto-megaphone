@@ -53,4 +53,4 @@ Add it using configuration like::
   kinto.event_listeners.mp.api_key = foobar
   kinto.event_listeners.mp.url = http://megaphone.example.com/
   kinto.event_listeners.mp.broadcaster_id = remote-settings
-  kinto.event_listeners.mp.match_kinto_changes = /buckets/main /buckets/blocklists /buckets/gfx
+  kinto.event_listeners.mp.match_kinto_changes = /buckets/main /buckets/blocklists/collections/addons /buckets/blocklists/collections/gfx
