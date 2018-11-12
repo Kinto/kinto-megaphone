@@ -1,2 +1,3 @@
 kinto==10.1.1
+kinto-changes==1.3.0
 requests==2.19.1
