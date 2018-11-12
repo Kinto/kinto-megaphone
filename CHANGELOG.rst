@@ -4,10 +4,10 @@ Changelog
 This document describes changes between each past release.
 
 
-0.2.4 (unreleased)
+0.3.0 (2018-11-12)
 ------------------
 
-- Nothing changed yet.
+- Add configuration to restrict what kinto-changes records cause notifications (#13).
 
 
 0.2.3 (2018-11-07)
