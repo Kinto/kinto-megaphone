@@ -108,8 +108,8 @@ def load_from_config(config, prefix):
 
     settings = config.get_settings()
     if prefix + "match_kinto_changes" not in settings:
-        ERROR_MSG = "Resources to filter must be provided to kinto_changes " \
-            "using match_kinto_changes"
+        ERROR_MSG = ("Resources to filter must be provided to kinto_changes "
+                     "using match_kinto_changes")
         raise ConfigurationError(ERROR_MSG)
     resources = aslist(settings[prefix + "match_kinto_changes"])
 

@@ -74,8 +74,8 @@ def test_kinto_changes_complains_about_missing_config_param(kinto_changes_settin
     config = Configurator(settings=kinto_changes_settings)
     with pytest.raises(ConfigurationError) as excinfo:
         load_from_config(config, 'event_listeners.mp.')
-    ERROR_MSG = "Resources to filter must be provided to kinto_changes" \
-        " using match_kinto_changes"
+    ERROR_MSG = ("Resources to filter must be provided to kinto_changes "
+                 "using match_kinto_changes")
     assert excinfo.value.args[0] == ERROR_MSG
 
 
