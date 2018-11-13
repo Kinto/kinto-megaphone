@@ -58,3 +58,5 @@ Add it using configuration like::
 Note that the ``match_kinto_changes`` configuration only lets you
 describe resources that are tracked by kinto-changes -- you won't be
 able to put e.g. groups or accounts in there.
+
+Test test test.
