@@ -34,13 +34,13 @@ Add it to kinto.includes::
 
 Then, you'll want to add a listener.
 
-The kinto-megaphone listener is called KintoChangesListener and
+The kinto-megaphone listener is called ``KintoChangesListener`` and
 it watches the ``monitor/changes`` collection from ``kinto-changes``.
 You provide a list of resources, and when those resources are updated
-in ``monitor/changes``, we notify megaphone with the new collection
+in ``monitor/changes``, we notify Megaphone with the new collection
 timestamp.
 
-If talking to megaphone fails, it will abort the request (including
+If talking to Megaphone fails, it will abort the request (including
 rolling back the changes made in the request).
 
 kinto-megaphone only offers this one kind of listener right
@@ -51,7 +51,7 @@ Add it using configuration like::
   kinto.event_listeners = mp
   kinto.event_listeners.mp.use = kinto_megaphone.listeners
   kinto.event_listeners.mp.api_key = foobar
-  kinto.event_listeners.mp.url = http://megaphone.example.com/
+  kinto.event_listeners.mp.url = https://megaphone.example.com/
   kinto.event_listeners.mp.broadcaster_id = remote-settings
   kinto.event_listeners.mp.match_kinto_changes = /buckets/main /buckets/blocklists/collections/addons /buckets/blocklists/collections/gfx
 
