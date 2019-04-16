@@ -1,6 +1,6 @@
 flake8
 mock
-pytest==4.4.0
+pytest==4.4.1
 pytest-cache
 pytest-cov
 pytest-sugar
