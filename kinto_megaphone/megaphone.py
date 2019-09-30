@@ -36,7 +36,9 @@ class Megaphone(object):
         url = '{}/v1/broadcasts/{}/{}'.format(self.url, broadcaster_id, channel_id)
         resp = requests.put(url, auth=self.auth, data=version)
         resp.raise_for_status()
-        logger.info("Sent version to megaphone. Response was {}".format(resp.status_code))
+        logger.info("Sent version {} to megaphone. Response was {}".format(
+            version, resp.status_code
+        ))
 
     def heartbeat(self):
         url = '{}/__heartbeat__'.format(self.url)
