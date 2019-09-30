@@ -4,7 +4,7 @@ Changelog
 This document describes changes between each past release.
 
 
-0.3.1 (unreleased)
+0.4.0 (2019-09-30)
 ------------------
 
 - Log version value when broadcasting to Megaphone
