@@ -94,7 +94,13 @@ class KintoChangesListener(ListenerBase):
     def send_notification(self, event):
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
-        timestamp = event.payload['timestamp']
+
+        collection_uri = utils.instance_uri(event.request, "collection",
+            bucket_id=bucket_id, id=collection_id)
+        storage = event.request.registry.storage
+        timestamp = storage.resource_timestamp(resource_name="record",
+            parent_id=collection_uri)
+
         etag = '"{}"'.format(timestamp)
         service_id = '{}_{}'.format(bucket_id, collection_id)
         logger.info("Sending version: {}, {}".format(self.broadcaster_id, service_id))

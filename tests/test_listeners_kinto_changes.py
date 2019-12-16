@@ -148,10 +148,11 @@ def test_kcl_posts_on_matching_records(match_buckets_a_resource):
         {'new': changes_record('a', 'c')},
     ]
     request = DummyRequest()
+    request.registry.storage.resource_timestamp.return_value = 42
     event = events.ResourceChanged(PAYLOAD, single_record, request)
 
     listener(event)
-    client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
+    client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"42"')
 
 
 def test_kcl_calls_with_some_matching_records(match_buckets_a_resource):
@@ -163,10 +164,11 @@ def test_kcl_calls_with_some_matching_records(match_buckets_a_resource):
         {'new': changes_record('a', 'c')},
     ]
     request = DummyRequest()
+    request.registry.storage.resource_timestamp.return_value = 42
     event = events.ResourceChanged(PAYLOAD, two_records, request)
 
     listener(event)
-    client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
+    client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"42"')
 
 
 def test_kcl_can_match_in_collections(match_collection_z1_resource):
@@ -177,10 +179,11 @@ def test_kcl_can_match_in_collections(match_collection_z1_resource):
         {'new': changes_record('z', 'z1')},
     ]
     request = DummyRequest()
+    request.registry.storage.resource_timestamp.return_value = 42
     event = events.ResourceChanged(PAYLOAD, one_record, request)
 
     listener(event)
-    client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"123"')
+    client.send_version.assert_called_with('broadcaster', 'monitor_changes', '"42"')
 
 
 def test_kcl_can_fail_to_match_in_collections(match_collection_z1_resource):
