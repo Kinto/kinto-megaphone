@@ -87,26 +87,19 @@ class KintoChangesListener(ListenerBase):
             logger.debug("No records matched; dropping event")
             return
 
-        filtered_event = type(event)(event.payload, matching_records, event.request)
-
-        return self.send_notification(filtered_event)
-
-    def send_notification(self, event):
-        bucket_id = event.payload['bucket_id']
-        collection_id = event.payload['collection_id']
-
-        collection_uri = utils.instance_uri(event.request, "collection",
-            bucket_id=bucket_id, id=collection_id)
-        storage = event.request.registry.storage
-        timestamp = storage.resource_timestamp(resource_name="record",
-            parent_id=collection_uri)
-
+        event = type(event)(event.payload, matching_records, event.request)
+        collection_uri = utils.instance_uri(
+            event.request, "collection", bucket_id=bucket_id, id=collection_id)
+        timestamp = event.request.registry.storage.resource_timestamp(
+            resource_name="record", parent_id=collection_uri)
         etag = '"{}"'.format(timestamp)
+
+        return self.send_notification(bucket_id, collection_id, etag)
+
+    def send_notification(self, bucket_id, collection_id, version):
         service_id = '{}_{}'.format(bucket_id, collection_id)
         logger.info("Sending version: {}, {}".format(self.broadcaster_id, service_id))
-        self.client.send_version(self.broadcaster_id,
-                                 service_id,
-                                 etag)
+        self.client.send_version(self.broadcaster_id, service_id, version)
 
 
 def load_from_config(config, prefix):
