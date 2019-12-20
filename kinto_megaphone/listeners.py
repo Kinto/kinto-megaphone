@@ -87,11 +87,8 @@ class KintoChangesListener(ListenerBase):
             logger.debug("No records matched; dropping event")
             return
 
-        event = type(event)(event.payload, matching_records, event.request)
-        collection_uri = utils.instance_uri(
-            event.request, "collection", bucket_id=bucket_id, id=collection_id)
-        timestamp = event.request.registry.storage.resource_timestamp(
-            resource_name="record", parent_id=collection_uri)
+        # Timestamp comes from "changes" object (ie. first impacted record).
+        timestamp = matching_records[0]["last_modified"]
         etag = '"{}"'.format(timestamp)
 
         return self.send_notification(bucket_id, collection_id, etag)

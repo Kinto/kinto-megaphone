@@ -220,6 +220,11 @@ def test_kinto_app_puts_version(requests, kinto_app):
                                     auth=BearerAuth('token'),
                                     data=collection_etag)
 
+    # Consistency assertion
+    resp = app.get('/buckets/monitor/collections/changes/records')
+    changes_etag = resp.headers['ETag']
+    assert changes_etag == collection_etag
+
 
 @mock.patch('kinto_megaphone.megaphone.requests')
 def test_kinto_app_ignores_other_kinto_changes_version(requests, kinto_app):
