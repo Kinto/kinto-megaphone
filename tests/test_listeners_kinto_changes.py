@@ -209,18 +209,16 @@ def test_kinto_app_puts_version(requests, kinto_app):
     app = kinto_app
     app.put_json('/buckets/a', {})
     app.put_json('/buckets/a/collections/a_1', {})
-    resp = app.put_json('/buckets/a/collections/a_1/records/a_1_2', {})
-    records_etag = resp.headers['ETag']
+    app.put_json('/buckets/a/collections/a_1/records/a_1_2', {})
 
     resp = app.get('/buckets/a/collections/a_1/records')
     collection_etag = resp.headers['ETag']
-    assert records_etag == collection_etag
 
     assert requests.put.call_count == 1
     monitor_changes_endpoint = 'http://megaphone.example.com/v1/broadcasts/bcast/monitor_changes'
     requests.put.assert_called_with(monitor_changes_endpoint,
                                     auth=BearerAuth('token'),
-                                    data=records_etag)
+                                    data=collection_etag)
 
 
 @mock.patch('kinto_megaphone.megaphone.requests')
