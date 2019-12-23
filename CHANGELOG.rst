@@ -7,7 +7,9 @@ This document describes changes between each past release.
 0.4.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Send resource timestamp instead of event timestamp (fixes #65)
 
 
 0.4.0 (2019-09-30)

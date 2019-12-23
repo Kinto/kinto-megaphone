@@ -177,6 +177,7 @@ def test_kcl_can_match_in_collections(match_collection_z1_resource):
         {'new': changes_record('z', 'z1')},
     ]
     request = DummyRequest()
+    request.route_path.return_value = "/buckets/z/collections/z1"
     event = events.ResourceChanged(PAYLOAD, one_record, request)
 
     listener(event)
@@ -202,18 +203,21 @@ def test_kinto_app_puts_version(requests, kinto_app):
     app = kinto_app
     app.put_json('/buckets/a', {})
     app.put_json('/buckets/a/collections/a_1', {})
-    resp = app.put_json('/buckets/a/collections/a_1/records/a_1_2', {})
-    records_etag = resp.headers['ETag']
+    app.put_json('/buckets/a/collections/a_1/records/a_1_2', {})
 
     resp = app.get('/buckets/a/collections/a_1/records')
     collection_etag = resp.headers['ETag']
-    assert records_etag == collection_etag
 
     assert requests.put.call_count == 1
     monitor_changes_endpoint = 'http://megaphone.example.com/v1/broadcasts/bcast/monitor_changes'
     requests.put.assert_called_with(monitor_changes_endpoint,
                                     auth=BearerAuth('token'),
-                                    data=records_etag)
+                                    data=collection_etag)
+
+    # Consistency assertion
+    resp = app.get('/buckets/monitor/collections/changes/records')
+    changes_etag = resp.headers['ETag']
+    assert changes_etag == collection_etag
 
 
 @mock.patch('kinto_megaphone.megaphone.requests')

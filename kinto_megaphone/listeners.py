@@ -76,31 +76,35 @@ class KintoChangesListener(ListenerBase):
                 event.payload['resource_name']))
             return
 
+        # We are only interested in ResourceChanged events on 'record'
+        # in the "monitor/changes" collection. These events are forged
+        # by the Kinto/kinto-changes plugin.
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
         if bucket_id != MONITOR_BUCKET or collection_id != CHANGES_COLLECTION:
             logger.debug("Event was not for monitor/changes; discarding")
             return
 
+        # In Kinto/kinto-changes, we send events every time there is a record
+        # change in the watched collections. In Megaphone, we don't send notifs
+        # for all of them (eg. not preview).
         matching_records = self.filter_records(event.impacted_records)
         if not matching_records:
             logger.debug("No records matched; dropping event")
             return
 
-        filtered_event = type(event)(event.payload, matching_records, event.request)
-
-        return self.send_notification(filtered_event)
-
-    def send_notification(self, event):
-        bucket_id = event.payload['bucket_id']
-        collection_id = event.payload['collection_id']
-        timestamp = event.payload['timestamp']
+        # In Kinto/kinto-changes, the event data contains information about
+        # then changed collection(s). The `last_modified` field is the collection
+        # plural timestamp.
+        timestamp = max(r["last_modified"] for r in matching_records)
         etag = '"{}"'.format(timestamp)
+
+        return self.send_notification(bucket_id, collection_id, etag)
+
+    def send_notification(self, bucket_id, collection_id, version):
         service_id = '{}_{}'.format(bucket_id, collection_id)
         logger.info("Sending version: {}, {}".format(self.broadcaster_id, service_id))
-        self.client.send_version(self.broadcaster_id,
-                                 service_id,
-                                 etag)
+        self.client.send_version(self.broadcaster_id, service_id, version)
 
 
 def load_from_config(config, prefix):
