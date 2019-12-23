@@ -76,18 +76,26 @@ class KintoChangesListener(ListenerBase):
                 event.payload['resource_name']))
             return
 
+        # We are only interested in ResourceChanged events on 'record'
+        # in the "monitor/changes" collection. These events are forged
+        # by the Kinto/kinto-changes plugin.
         bucket_id = event.payload['bucket_id']
         collection_id = event.payload['collection_id']
         if bucket_id != MONITOR_BUCKET or collection_id != CHANGES_COLLECTION:
             logger.debug("Event was not for monitor/changes; discarding")
             return
 
+        # In Kinto/kinto-changes, we send events every time there is a record
+        # change in the watched collections. In Megaphone, we don't send notifs
+        # for all of them (eg. not preview).
         matching_records = self.filter_records(event.impacted_records)
         if not matching_records:
             logger.debug("No records matched; dropping event")
             return
 
-        # Timestamp comes from "changes" object (ie. first impacted record).
+        # In Kinto/kinto-changes, the event data contains information about
+        # then changed collection. The timestamp is the collection plural
+        # timestamp.
         timestamp = matching_records[0]["last_modified"]
         etag = '"{}"'.format(timestamp)
 
