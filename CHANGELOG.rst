@@ -4,7 +4,7 @@ Changelog
 This document describes changes between each past release.
 
 
-0.4.1 (unreleased)
+0.4.1 (2019-12-23)
 ------------------
 
 **Bug fixes**
