@@ -94,9 +94,9 @@ class KintoChangesListener(ListenerBase):
             return
 
         # In Kinto/kinto-changes, the event data contains information about
-        # then changed collection. The timestamp is the collection plural
-        # timestamp.
-        timestamp = matching_records[0]["last_modified"]
+        # then changed collection(s). The `last_modified` field is the collection
+        # plural timestamp.
+        timestamp = max(r["last_modified"] for r in matching_records)
         etag = '"{}"'.format(timestamp)
 
         return self.send_notification(bucket_id, collection_id, etag)
