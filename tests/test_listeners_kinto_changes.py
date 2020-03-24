@@ -1,6 +1,6 @@
 import mock
 import pytest
-import kinto.core
+
 from kinto.core import events
 from kinto.core.testing import DummyRequest
 from pyramid.config import Configurator, ConfigurationError
@@ -14,12 +14,12 @@ from kinto_megaphone.megaphone import BearerAuth
 
 @pytest.fixture
 def match_buckets_a_resource():
-    return [('bucket', {'bucket_id': 'a'})]
+    return [('bucket', {'id': 'a'})]
 
 
 @pytest.fixture
 def match_collection_z1_resource():
-    return [('collection', {'collection_id': 'z1', 'bucket_id': 'z'})]
+    return [('collection', {'id': 'z1', 'bucket_id': 'z'})]
 
 
 PAYLOAD = {
@@ -79,20 +79,20 @@ def test_kinto_changes_complains_about_missing_config_param(kinto_changes_settin
                  "using match_kinto_changes")
     assert excinfo.value.args[0] == ERROR_MSG
 
+
 def test_excluding_resources(kinto_changes_settings):
     client = mock.Mock()
     listener = KintoChangesListener(client, 'broadcaster', [], [])
     listener.included_resources = [
-        ('bucket', {'bucket_id': 'a'}),
-        ('collection', {'bucket_id': 'b', 'collection_id': 'd'}),
-        ('collection', {'bucket_id': 'z', 'collection_id': 'z1'}),
+        ('bucket', {'id': 'a'}),
+        ('collection', {'bucket_id': 'b', 'id': 'd'}),
+        ('collection', {'bucket_id': 'z', 'id': 'z1'}),
     ]
     listener.excluded_resources = [
-        ('bucket', {'bucket_id': 'b'}),
-        ('collection', {'bucket_id': 'a', 'collection_id': 'c'}),
-        ('collection', {'bucket_id': 'z', 'collection_id': 'z2'}),
+        ('bucket', {'id': 'b'}),
+        ('collection', {'bucket_id': 'a', 'id': 'c'}),
+        ('collection', {'bucket_id': 'z', 'id': 'z2'}),
     ]
-    single_record = []
     request = DummyRequest()
 
     client.reset_mock()
@@ -114,6 +114,16 @@ def test_excluding_resources(kinto_changes_settings):
     event = events.ResourceChanged(PAYLOAD, [{'new': changes_record('z', 'z1')}], request)
     listener(event)
     assert client.send_version.called
+
+    client.reset_mock()
+    event = events.ResourceChanged(PAYLOAD, [{'new': changes_record('a', 'z2')}], request)
+    listener(event)
+    assert client.send_version.called
+
+    client.reset_mock()
+    event = events.ResourceChanged(PAYLOAD, [{'new': changes_record('x', 'z1')}], request)
+    listener(event)
+    assert not client.send_version.called
 
 
 def test_kinto_changes_ignores_not_monitor_changes(match_buckets_a_resource):
