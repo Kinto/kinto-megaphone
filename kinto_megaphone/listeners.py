@@ -14,6 +14,23 @@ DEFAULT_SETTINGS = {}
 logger = logging.getLogger(__name__)
 
 
+def match_resource(resource, bid, cid):
+    """Helper that returns True if the specified bucket id and collection id
+    match the given resource.
+    """
+    resource_name, matchdict = resource
+    resource_bucket = matchdict['id'] if resource_name == 'bucket' else matchdict['bucket_id']
+    resource_collection = matchdict['id'] if resource_name == 'collection' else None
+
+    same_bucket = resource_bucket == bid
+    same_collection = resource_collection and resource_collection == cid
+
+    if same_bucket and (resource_name == 'bucket' or same_collection):
+        return True
+
+    return False
+
+
 class KintoChangesListener(ListenerBase):
     """An event listener that's specialized for handling kinto-changes feeds.
 
@@ -26,19 +43,31 @@ class KintoChangesListener(ListenerBase):
     timestamps when certain monitored collections change.
 
     """
-    def __init__(self, client, broadcaster_id, raw_resources, resources=None):
+    def __init__(
+        self, client, broadcaster_id, included_resources, excluded_resources, resources=None
+    ):
         self.client = client
         self.broadcaster_id = broadcaster_id
-        self.raw_resources = raw_resources
+        self.included_resources_uris = included_resources
+        self.included_resources = []
+        self.excluded_resources_uris = excluded_resources
+        self.excluded_resources = []
         # Used for testing, to pass parsed resources without having to
         # scan views etc.
         if resources:
-            self.resources = resources
+            self.included_resources = resources
 
     def _convert_resources(self, event):
-        self.resources = [
+        """ This event listener is called on application startup.
+        """
+        # [('bucket', {'id': 'a'}), ('collection', {'bucket_id': 'z', 'id': 'z1'})]
+        self.excluded_resources = [
             utils.view_lookup_registry(event.app.registry, r)
-            for r in self.raw_resources
+            for r in self.excluded_resources_uris
+        ]
+        self.included_resources = [
+            utils.view_lookup_registry(event.app.registry, r)
+            for r in self.included_resources_uris
         ]
 
     def filter_records(self, impacted_records):
@@ -47,25 +76,14 @@ class KintoChangesListener(ListenerBase):
             if 'new' not in delta:
                 continue  # skip deletes
             record = delta['new']
-            record_bucket = record['bucket']
-            record_collection = record['collection']
-            for (resource_name, matchdict) in self.resources:
-                if resource_name == 'bucket':
-                    resource_bucket = matchdict['id']
-                else:
-                    resource_bucket = matchdict.get('bucket_id')
+            bid = record['bucket']
+            cid = record['collection']
 
-                if resource_name == 'collection':
-                    resource_collection = matchdict['id']
-                else:
-                    resource_collection = matchdict.get('collection_id')
-
-                if resource_bucket and resource_bucket != record_bucket:
-                    continue
-
-                if resource_collection and resource_collection != record_collection:
-                    continue
-
+            match = (
+                any(match_resource(r, bid, cid) for r in self.included_resources) and
+                not any(match_resource(r, bid, cid) for r in self.excluded_resources)
+            )
+            if match:
                 ret.append(record)
 
         return ret
@@ -115,10 +133,13 @@ def load_from_config(config, prefix):
         ERROR_MSG = ("Resources to filter must be provided to kinto_changes "
                      "using match_kinto_changes")
         raise ConfigurationError(ERROR_MSG)
-    resources = aslist(settings[prefix + "match_kinto_changes"])
+    included_resources = aslist(settings[prefix + "match_kinto_changes"])
+
+    excluded_resources = aslist(settings.get(prefix + "except_kinto_changes", ""))
 
     client = megaphone.Megaphone(mp_config.url, mp_config.api_key)
-    listener = KintoChangesListener(client, mp_config.broadcaster_id, resources)
-    config.add_subscriber(listener._convert_resources,
-                          pyramid.events.ApplicationCreated)
+    listener = KintoChangesListener(
+        client, mp_config.broadcaster_id,
+        included_resources, excluded_resources)
+    config.add_subscriber(listener._convert_resources, pyramid.events.ApplicationCreated)
     return listener

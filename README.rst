@@ -54,6 +54,8 @@ Add it using configuration like::
   kinto.event_listeners.mp.url = https://megaphone.example.com/
   kinto.event_listeners.mp.broadcaster_id = remote-settings
   kinto.event_listeners.mp.match_kinto_changes = /buckets/main /buckets/blocklists/collections/addons /buckets/blocklists/collections/gfx
+  # Optional parameter ``except_kinto_changes``:
+  # kinto.event_listeners.mp.except_kinto_changes = /buckets/main/collections/cfr-models
 
 Note that the ``match_kinto_changes`` configuration only lets you
 describe resources that are tracked by kinto-changes -- you won't be
