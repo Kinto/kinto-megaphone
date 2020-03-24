@@ -4,7 +4,7 @@ Changelog
 This document describes changes between each past release.
 
 
-0.5.0 (unreleased)
+0.5.0 (2020-03-24)
 ------------------
 
 **New features**
