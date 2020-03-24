@@ -7,7 +7,9 @@ This document describes changes between each past release.
 0.5.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+**New features**
+
+- Add option to exclude certain resources (fixes #75)
 
 
 0.4.1 (2019-12-23)
